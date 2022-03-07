@@ -2,8 +2,10 @@ package com.suitcore.di.component
 
 import com.suitcore.di.module.ApplicationModule
 import com.suitcore.di.scope.SuitCoreApplicationScope
+import com.suitcore.feature.choose.ChoosePresenter
 import com.suitcore.feature.event.EventPresenter
 import com.suitcore.feature.event.search.SearchPlacePresenter
+import com.suitcore.feature.home.HomePresenter
 import com.suitcore.feature.login.LoginPresenter
 import com.suitcore.feature.member.MemberPresenter
 import com.suitcore.feature.sidemenu.SideMenuPresenter
@@ -31,4 +33,8 @@ interface ApplicationComponent {
     fun inject(eventPresenter: EventPresenter)
 
     fun inject(sideMenuPresenter: SideMenuPresenter)
+
+    fun inject(homePresenter: HomePresenter)
+
+    fun inject(choosePresenter: ChoosePresenter)
 }

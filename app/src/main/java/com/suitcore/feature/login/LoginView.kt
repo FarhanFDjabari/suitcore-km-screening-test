@@ -13,4 +13,6 @@ interface LoginView : MvpView {
 
     fun onLoginFailed(message: String?)
 
+    fun onPalindrome(message: String?)
+
 }

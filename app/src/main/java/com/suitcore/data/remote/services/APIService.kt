@@ -4,12 +4,11 @@ import com.suitcore.data.model.Place
 import com.suitcore.data.model.User
 import com.suitcore.data.remote.wrapper.MapBoxResults
 import com.suitcore.data.remote.wrapper.Results
+import com.suitcore.data.remote.wrapper.Result
 import io.reactivex.Flowable
 import io.reactivex.Single
 import kotlinx.coroutines.Deferred
-import retrofit2.http.GET
-import retrofit2.http.Query
-import retrofit2.http.Url
+import retrofit2.http.*
 
 /**
  * Created by DODYDMW19 on 8/3/2017.
@@ -21,6 +20,18 @@ interface APIService {
     fun getMembers(
             @Query("per_page") perPage: Int,
             @Query("page") page: Int): Single<Results<User>>
+
+    @GET("users/{id}")
+    fun getMember(
+        @Path("id") id: Int
+    ) : Deferred<Result<User>>
+
+    @POST("login")
+    @FormUrlEncoded()
+    fun loginAsync(
+        @Field("email") email: String,
+        @Field("password") password: String
+    ): Deferred<Result<String>>
 
     @GET("users")
     fun getMembersCoroutinesAsync(

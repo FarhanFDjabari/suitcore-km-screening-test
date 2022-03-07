@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".feature.home.HomeActivity">
+
+    <com.facebook.drawee.view.SimpleDraweeView
+        android:id="@+id/selectedMemberImg"
+        android:layout_marginTop="224dp"
+        android:layout_height="80dp"
+        android:layout_width="80dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.498"
+        app:backgroundImage="@drawable/bg_button_rounded"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:srcCompat="@tools:sample/avatars"
+        tools:ignore="ContentDescription" />
+
+    <TextView
+        android:id="@+id/username"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="28dp"
+        android:textSize="@dimen/_16sdp"
+        style="@style/TextAppearance.AppCompat.Headline"
+        android:textStyle="bold"
+        android:text="User Name"
+        app:layout_constraintEnd_toEndOf="@+id/selectedMemberImg"
+        app:layout_constraintStart_toStartOf="@+id/selectedMemberImg"
+        app:layout_constraintTop_toBottomOf="@+id/selectedMemberImg" />
+
+    <TextView
+        android:id="@+id/userEmail"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        style="@style/TextAppearance.MaterialComponents.Subtitle2"
+        android:text="User Email"
+        android:textAlignment="center"
+        app:layout_constraintEnd_toEndOf="@+id/username"
+        app:layout_constraintHorizontal_bias="0.513"
+        app:layout_constraintStart_toStartOf="@+id/username"
+        app:layout_constraintTop_toBottomOf="@+id/username" />
+
+    <Button
+        android:id="@+id/chooseMemberBtn"
+        style="@style/BtnLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/_70sdp"
+        android:layout_marginTop="120dp"
+        android:text="Choose Member"
+        android:textColor="#212121"
+        app:layout_constraintEnd_toEndOf="@+id/selectedMemberImg"
+        app:layout_constraintStart_toStartOf="@+id/selectedMemberImg"
+        app:layout_constraintTop_toBottomOf="@+id/userEmail" />
+</androidx.constraintlayout.widget.ConstraintLayout>

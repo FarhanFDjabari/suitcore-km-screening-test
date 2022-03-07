@@ -23,5 +23,8 @@ open class User : RealmObject(){
     @SerializedName("avatar")
     var avatar: String? = ""
 
+    @SerializedName("email")
+    var email: String? = ""
+
 
 }

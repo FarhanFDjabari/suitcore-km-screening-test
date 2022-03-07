@@ -5,7 +5,6 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.play.core.install.model.ActivityResult
@@ -15,8 +14,7 @@ import com.suitcore.R
 import com.suitcore.base.ui.BaseActivity
 import com.suitcore.data.model.UpdateType
 import com.suitcore.databinding.ActivityLoginBinding
-import com.suitcore.feature.sidemenu.SideMenuActivity
-import com.suitcore.feature.tabmenu.TabMenuActivity
+import com.suitcore.feature.home.HomeActivity
 import com.suitcore.firebase.analytics.FireBaseConstant
 import com.suitcore.firebase.analytics.FireBaseHelper
 import com.suitcore.firebase.remoteconfig.RemoteConfigHelper
@@ -27,10 +25,6 @@ import com.suitcore.helper.CommonUtils
 import com.suitcore.helper.inappupdates.InAppUpdateManager
 import com.suitcore.helper.inappupdates.InAppUpdateStatus
 import com.suitcore.helper.permission.SuitPermissions
-import com.suitcore.helper.socialauth.facebook.FacebookHelper
-import com.suitcore.helper.socialauth.facebook.FacebookListener
-import com.suitcore.helper.socialauth.google.GoogleListener
-import com.suitcore.helper.socialauth.google.GoogleSignInHelper
 import timber.log.Timber
 
 /**
@@ -38,20 +32,16 @@ import timber.log.Timber
  */
 
 class LoginActivity : BaseActivity<ActivityLoginBinding>(), LoginView, RemoteConfigView,
-        GoogleListener, FacebookListener, InAppUpdateManager.InAppUpdateHandler {
+        InAppUpdateManager.InAppUpdateHandler {
 
     private var loginPresenter: LoginPresenter? = null
     private var remoteConfigPresenter: RemoteConfigPresenter? = null
     private var inAppUpdateManager: InAppUpdateManager? = null
 
-    private var mGoogleHelper: GoogleSignInHelper? = null
-    private var mFbHelper: FacebookHelper? = null
-
     override fun getViewBinding(): ActivityLoginBinding = ActivityLoginBinding.inflate(layoutInflater)
 
     override fun onViewReady(savedInstanceState: Bundle?) {
         setupPresenter()
-        setupSocialLogin()
         actionClicked()
         needPermissions()
         CommonUtils.getIMEIDeviceId(this)
@@ -109,24 +99,9 @@ class LoginActivity : BaseActivity<ActivityLoginBinding>(), LoginView, RemoteCon
         inAppUpdateManager?.checkForAppUpdate()
     }
 
-    private fun setupSocialLogin() {
-        // Google  initialization
-        mGoogleHelper = GoogleSignInHelper(this, getString(R.string.google_default_web_client_id), this)
-
-        // fb initialization
-        mFbHelper = FacebookHelper(this, getString(R.string.facebook_request_field))
-
-        signOut()
-    }
-
-    private fun signOut() {
-        mGoogleHelper?.performSignOut()
-        mFbHelper?.performSignOut()
-    }
-
     override fun onLoginSuccess(message: String?) {
-        //goToActivity(MemberActivity::class.java, null, clearIntent = true, isFinish = true)
-        showToast("Login Success")
+        goToActivity(HomeActivity::class.java, null, clearIntent = true, isFinish = true)
+        showToast("$message")
     }
 
     override fun onLoginFailed(message: String?) {
@@ -135,22 +110,8 @@ class LoginActivity : BaseActivity<ActivityLoginBinding>(), LoginView, RemoteCon
         }
     }
 
-    override fun onGoogleAuthSignIn(authToken: String?, userId: String?) {
-        // send token & user_id to server
-        loginPresenter?.login()
-    }
-
-    override fun onGoogleAuthSignInFailed(errorMessage: String?) {
-        showToast(errorMessage.toString())
-    }
-
-    override fun onFbSignInFail(errorMessage: String?) {
-        showToast(errorMessage.toString())
-    }
-
-    override fun onFbSignInSuccess(authToken: String?, userId: String?) {
-        // send token & user_id to server
-        loginPresenter?.login()
+    override fun onPalindrome(message: String?) {
+        showDialogAlert(message,"")
     }
 
     override fun onUpdateBaseUrlNeeded(type: String?, url: String?) {
@@ -202,29 +163,29 @@ class LoginActivity : BaseActivity<ActivityLoginBinding>(), LoginView, RemoteCon
     }
 
     private fun actionClicked() {
-        binding.relGoogle.setOnClickListener {
-            mGoogleHelper?.performSignIn(this)
+        binding.btnCheckPalindrome.setOnClickListener {
+            if (!binding.inputPalindrome.text.isNullOrEmpty()) {
+                loginPresenter?.checkPalindrome(binding.inputPalindrome.text.toString())
+            } else {
+                binding.inputPalindrome.error = "This field must not empty";
+            }
         }
 
-        binding.relFacebook.setOnClickListener {
-            mFbHelper?.performSignIn(this)
+        binding.btnLogin.setOnClickListener {
+            if (binding.inputEmail.text.isNullOrEmpty()) {
+                binding.inputEmail.error = "Email field must not empty"
+            }
+            if (binding.inputPassword.text.isNullOrEmpty()) {
+                binding.inputPassword.error = "Password field must not empty"
+            }
+            if (!binding.inputEmail.text.isNullOrEmpty() && !binding.inputPassword.text.isNullOrEmpty()) {
+                loginPresenter?.login(
+                    binding.inputEmail.text.toString(),
+                    binding.inputPassword.text.toString()
+                )
+            }
         }
 
-//        binding.relTwitter.setOnClickListener {
-//            if (CommonUtils.checkTwitterApp(this)) {
-//                mTwitterHelper?.performSignIn()
-//            } else {
-//                showToast(getString(R.string.txt_twitter_not_installed))
-//            }
-//        }
-
-        binding.tvSkipToTabMenu.setOnClickListener {
-            goToActivity(TabMenuActivity::class.java, null, clearIntent = true, isFinish = true)
-        }
-
-        binding.tvSkipToSideMenu.setOnClickListener {
-            goToActivity(SideMenuActivity::class.java, null, clearIntent = true, isFinish = true)
-        }
     }
 
     @SuppressLint("TimberArgCount")
@@ -245,9 +206,7 @@ class LoginActivity : BaseActivity<ActivityLoginBinding>(), LoginView, RemoteCon
             }
         } else {
             if (data != null) {
-                mGoogleHelper?.onActivityResult(requestCode, resultCode, data)
-               // mTwitterHelper?.onActivityResult(requestCode, resultCode, data)
-                mFbHelper?.onActivityResult(requestCode, resultCode, data)
+
             }
         }
     }

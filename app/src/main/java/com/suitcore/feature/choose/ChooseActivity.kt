@@ -1,86 +1,59 @@
-package com.suitcore.feature.member
+package com.suitcore.feature.choose
 
+import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
-import androidx.fragment.app.DialogFragment
-import androidx.fragment.app.Fragment
 import com.suitcore.R
-import com.suitcore.base.ui.BaseFragment
+import com.suitcore.base.ui.BaseActivity
 import com.suitcore.base.ui.recyclerview.BaseRecyclerView
 import com.suitcore.base.ui.recyclerview.EndlessScrollCallback
 import com.suitcore.data.model.ErrorCodeHelper
 import com.suitcore.data.model.User
-import com.suitcore.databinding.FragmentMemberBinding
+import com.suitcore.databinding.ActivityChooseBinding
+import com.suitcore.feature.member.MemberAdapter
+import com.suitcore.feature.member.SingleMemberItemView
 import io.realm.RealmResults
 
-/**
- * Created by DODYDMW19 on 1/30/2018.
- */
 
-class MemberFragment : BaseFragment<FragmentMemberBinding>(),
-    MemberView, SingleMemberItemView.OnActionListener{
+class ChooseActivity : BaseActivity<ActivityChooseBinding>(), ChooseView, SingleMemberItemView.OnActionListener {
 
-    private var memberPresenter: MemberPresenter? = null
+    private var choosePresenter: ChoosePresenter? = null
     private var currentPage: Int = 1
     private var memberAdapter: MemberAdapter? = null
 
-    companion object {
-        fun newInstance(): Fragment {
-            return MemberFragment()
-        }
-    }
-
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        FragmentMemberBinding.inflate(inflater, container, false)
-        return super.onCreateView(inflater, container, savedInstanceState)
-    }
-
-    override fun getViewBinding(
-        inflater: LayoutInflater,
-        container: ViewGroup?
-    ): FragmentMemberBinding = FragmentMemberBinding.inflate(inflater, container, false)
+    override fun getViewBinding(): ActivityChooseBinding = ActivityChooseBinding.inflate(layoutInflater)
 
     override fun onViewReady(savedInstanceState: Bundle?) {
         setupProgressView()
         setupEmptyView()
         setupErrorView()
         setupList()
+        onClickHandler()
         Handler(Looper.getMainLooper()).postDelayed({
-            setupPresenter()
+            choosePresenter = ChoosePresenter()
+            choosePresenter?.attachView(this)
+            choosePresenter?.getMemberCache()
         }, 100)
     }
 
-    private fun setupPresenter() {
-        memberPresenter = MemberPresenter()
-        memberPresenter?.attachView(this)
-        memberPresenter?.getMemberCache()
-    }
-
     private fun setupList() {
-        memberAdapter = context?.let { MemberAdapter(it) }
+        memberAdapter = MemberAdapter(this)
         binding.rvMember.apply {
             setUpAsList()
             setAdapter(memberAdapter)
             /* Disable pull to refresh & pagination */
-            enableSwipeRefresh(false)
-//            setSwipeRefreshLoadingListener {
-//                currentPage = 1
-//                loadData(currentPage)
-//            }
-//            setLoadingListener(object : EndlessScrollCallback {
-//                override fun loadMore() {
-//                    currentPage++
-//                    loadData(currentPage)
-//                }
-//            })
+            setSwipeRefreshLoadingListener {
+                currentPage = 1
+                loadData(currentPage)
+            }
+            setLoadingListener(object : EndlessScrollCallback {
+                override fun loadMore() {
+                    currentPage++
+                    loadData(currentPage)
+                }
+            })
         }
         memberAdapter?.setOnActionListener(this)
         binding.rvMember.showShimmer()
@@ -88,7 +61,7 @@ class MemberFragment : BaseFragment<FragmentMemberBinding>(),
     }
 
     private fun loadData(page: Int) {
-        memberPresenter?.getMemberWithCoroutines(page)
+        choosePresenter?.getMemberWithCoroutines(page)
     }
 
     private fun setData(data: List<User>?) {
@@ -110,6 +83,12 @@ class MemberFragment : BaseFragment<FragmentMemberBinding>(),
         }
 
         binding.rvMember.baseShimmerBinding.viewStub.inflate()
+    }
+
+    private fun onClickHandler() {
+        binding.backBtn.setOnClickListener {
+            finish()
+        }
     }
 
     private fun setupEmptyView() {
@@ -173,15 +152,19 @@ class MemberFragment : BaseFragment<FragmentMemberBinding>(),
     }
 
     override fun onFailed(error: Any?) {
-        error?.let { ErrorCodeHelper.getErrorMessage(context, it)?.let { msg -> showToast(msg) } }
+        error?.let { ErrorCodeHelper.getErrorMessage(this, it)?.let { msg -> showToast(msg) } }
         showError()
     }
 
     override fun onClicked(view: SingleMemberItemView?) {
         view?.getData()?.let {
+            val resultIntent = Intent()
+            resultIntent.putExtra("user_name", "${it.firstName} ${it.lastName}")
+            resultIntent.putExtra("user_email", "${it.email}")
+            resultIntent.putExtra("user_avatar", "${it.avatar}")
+            setResult(RESULT_OK, resultIntent)
+            finish()
             showToast(it.firstName.toString())
-
         }
     }
-
 }

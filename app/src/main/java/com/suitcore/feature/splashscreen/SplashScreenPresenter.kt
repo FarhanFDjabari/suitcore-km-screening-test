@@ -14,7 +14,7 @@ import com.suitcore.base.presenter.BasePresenter
 class SplashScreenPresenter : BasePresenter<SplashScreenView> {
 
     private var mvpView: SplashScreenView? = null
-    private val time: Long = 3000
+    private val time: Long = 2500
 
     init {
         BaseApplication.applicationComponent.inject(this)
